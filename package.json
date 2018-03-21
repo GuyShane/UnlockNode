@@ -1,0 +1,25 @@
+{
+  "name": "unlock-node",
+  "version": "1.0.0",
+  "description": "A Node.js library for communicating with Unlock",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GuyShane/UnlockNode.git"
+  },
+  "keywords": [
+    "authentication",
+    "node.js",
+    "javascript",
+    "websocket"
+  ],
+  "author": "Shane Brass",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/GuyShane/UnlockNode/issues"
+  },
+  "homepage": "https://github.com/GuyShane/UnlockNode#readme"
+}
