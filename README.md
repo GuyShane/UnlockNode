@@ -135,3 +135,8 @@ const errorCodes={
     INVALID_API_KEY: 21
 };
 ```
+
+### License
+[MIT](https://opensource.org/licenses/MIT)
+
+Copyright (c) 2018 Shane Brass
