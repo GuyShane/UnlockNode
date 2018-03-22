@@ -38,6 +38,7 @@ unlock.init({
 });
 server.listen(3000);
 ```
+You can look in the example folder to see a simple express app that uses Unlock
 
 ### API
 #### unlock.init(options)
