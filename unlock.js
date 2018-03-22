@@ -105,15 +105,16 @@ function listen(io, opts){
             if (browserData.type!=='unlock'){return;}
             const unlockSocket=new WebSocket('wss://www.unlock-auth.com');
             unlockSocket.on('open', function(){
-                unlockSocket.send(JSON.stringify({
+                const toSend={
                     type: 'unlock',
                     version: opts.version,
                     email: browserData.email,
                     apiKey: opts.apiKey,
-                    payload: opts.makePayload(browserData.email),
-                    exp: opts.exp,
-                    requestType: opts.requestType
-                }));
+                    payload: opts.makePayload(browserData.email)
+                };
+                insert(toSend, 'exp', opts.exp);
+                insert(toSend, 'requestType', opts.requestType);
+                unlockSocket.send(JSON.stringify(toSend));
             });
             unlockSocket.on('message', function(msg){
                 const serverData=JSON.parse(msg);
@@ -200,6 +201,11 @@ function verifyOpts(obj, schema){
         }
     }
     return ret;
+}
+
+function insert(obj, key, val){
+    if (typeof val==='undefined'){return;}
+    obj[key]=val;
 }
 
 module.exports={
