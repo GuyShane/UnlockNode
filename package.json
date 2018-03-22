@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/GuyShane/UnlockNode#readme",
   "devDependencies": {
+    "cookie-parser": "^1.4.3",
     "express": "^4.16.3",
     "pug": "^2.0.3"
   },

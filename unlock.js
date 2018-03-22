@@ -29,20 +29,6 @@ const errorCodes={
     INVALID_API_KEY: 21
 };
 
-/**
- * Initializes Unlock to listen for incoming requests from the client,
- * forward that data to the Unlock server, and wait for responses.
- * Sends a ping request every 30 seconds to each client to keep connections open.
- * @param {Object} opts - Options to configure how Unlock will behave
- * @param {Object} opts.server - A node.js server instance
- * @param {string} opts.apiKey - Your Unlock developer API key
- * @param {number} opts.version - Which version of the Unlock API to use
- * @param {string=} opts.cookieName - The name in which to look for an authentication token
- * @param {number} [opts.exp=86400] - Expiry date of autorization JWTS expressed in seconds from issuance. Can be set to -1 for no expiry
- * @param {string=} opts.requestType - A custom request type definition which will be displayed to users
- * @param {function=} opts.makePayload - A function to make an optional payload to be signed in the authorization JWT. Passed the user's email address
- * @param {function} opts.onResponse - A function called when the Unlock server sends a response. Passed the data from the server
- */
 function init(opts){
     opts=verifyOpts(opts, {
         server: {
@@ -106,6 +92,7 @@ function listen(io, opts){
                 browserData=JSON.parse(msg);
             }
             catch(err){
+                console.log(err);
                 return;
             }
             try {
@@ -122,6 +109,7 @@ function listen(io, opts){
                 });
             }
             catch(err) {
+                console.log(err);
                 return;
             }
             const unlockSocket=new WebSocket('wss://www.unlock-auth.com');
@@ -155,17 +143,6 @@ function verifyToken(token){
     }
 }
 
-/**
- * Verifies a request sent with an authentication JWT and passes along the
- * decoded data through res.locals.decoded, as well as setting res.locals.authenticated
- * to indicate whether or not the request came in with a valid JWT
- * Token can be sent either as a query parameter, a cookie, an x-access-token header,
- * or in the body of a request
- * @param {Object} req - {@link https://expressjs.com/en/4x/api.html#req Express js request object}
- * @param {Object} res - {@link https://expressjs.com/en/4x/api.html#res Express js response object}
- * @param {function} next - Express js middleware chaining function
- * @static
- */
 function verifyRequest(req, res, next){
     const token=getToken(req);
     if (!token){
@@ -186,7 +163,7 @@ function verifyRequest(req, res, next){
 }
 
 function getToken(req){
-    return get(req.query, 'token')||
+    return get(req.query, 'authToken')||
         get(req.headers, 'x-access-token')||
         get(req.cookies, cookieName)||
         get(req.body, 'authToken');
