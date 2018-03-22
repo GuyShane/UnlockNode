@@ -44,10 +44,49 @@ const errorCodes={
  * @param {function} opts.onResponse - A function called when the Unlock server sends a response. Passed the data from the server
  */
 function init(opts){
+    opts=verifyOpts(opts, {
+        server: {
+            required: true,
+            type: 'object'
+        },
+        apiKey: {
+            required: true,
+            type: 'string'
+        },
+        version: {
+            required: true,
+            type: 'number'
+        },
+        onResponse: {
+            required: true,
+            type: 'function'
+        },
+        makePayload: {
+            required: false,
+            type: 'function',
+            default: function(){}
+        },
+        cookieName: {
+            required: false,
+            type: 'string',
+            default: null
+        },
+        exp: {
+            required: false,
+            type: 'number',
+            default: null
+        },
+        requestType: {
+            required: false,
+            type: 'string',
+            default: null
+        }
+    });
+
     apiKey=opts.apiKey;
     cookieName=opts.cookieName;
 
-    var io=new WebSocket.Server({
+    const io=new WebSocket.Server({
         server: opts.server,
         clientTracking: true
     });
@@ -62,9 +101,9 @@ function init(opts){
 function listen(io, opts){
     io.on('connection', function(browserSocket){
         browserSocket.on('message', function(msg){
-            var browserData=JSON.parse(msg);
+            const browserData=JSON.parse(msg);
             if (browserData.type!=='unlock'){return;}
-            var unlockSocket=new WebSocket('wss://www.unlock-auth.com');
+            const unlockSocket=new WebSocket('wss://www.unlock-auth.com');
             unlockSocket.on('open', function(){
                 unlockSocket.send(JSON.stringify({
                     type: 'unlock',
@@ -77,7 +116,7 @@ function listen(io, opts){
                 }));
             });
             unlockSocket.on('message', function(msg){
-                var serverData=JSON.parse(msg);
+                const serverData=JSON.parse(msg);
                 opts.onResponse(browserSocket, serverData);
                 unlockSocket.close();
             });
@@ -133,8 +172,8 @@ function verifyOpts(obj, schema){
     if (typeof obj==='undefined'){
         throw new Error('You need to supply an options object');
     }
-    var ret={};
-    var key;
+    const ret={};
+    let key;
     for (key in obj){
         if (!obj.hasOwnProperty(key)){continue;}
         if (typeof schema[key]==='undefined'){
@@ -143,13 +182,13 @@ function verifyOpts(obj, schema){
     }
     for (key in schema){
         if (!schema.hasOwnProperty(key)){continue;}
-        var reqs=schema[key];
-        var val=obj[key];
+        const reqs=schema[key];
+        const val=obj[key];
         if (typeof val==='undefined'){
             if (reqs.required){
                 throw new Error('Value '+key+' must be defined and of type '+reqs.type);
             }
-            else {
+            else if (reqs.default!==null){
                 ret[key]=reqs.default;
             }
         }
