@@ -101,8 +101,29 @@ function init(opts){
 function listen(io, opts){
     io.on('connection', function(browserSocket){
         browserSocket.on('message', function(msg){
-            const browserData=JSON.parse(msg);
-            if (browserData.type!=='unlock'){return;}
+            let browserData;
+            try {
+                browserData=JSON.parse(msg);
+            }
+            catch(err){
+                return;
+            }
+            try {
+                browserData=verifyOpts(browserData, {
+                    type: {
+                        required: true,
+                        type: 'string',
+                        value: 'unlock'
+                    },
+                    email: {
+                        required: true,
+                        type: 'string'
+                    }
+                });
+            }
+            catch(err) {
+                return;
+            }
             const unlockSocket=new WebSocket('wss://www.unlock-auth.com');
             unlockSocket.on('open', function(){
                 const toSend={
@@ -123,6 +144,15 @@ function listen(io, opts){
             });
         });
     });
+}
+
+function verifyToken(token){
+    try {
+        return jwt.verify(token, apiKey);
+    }
+    catch(err) {
+        return null;
+    }
 }
 
 /**
@@ -197,6 +227,9 @@ function verifyOpts(obj, schema){
             if (typeof val!==reqs.type){
                 throw new Error('Value '+key+' must be of type '+reqs.type);
             }
+            else if(typeof reqs.value!=='undefined' && val!==reqs.value){
+                throw new Error('Value '+key+' must equal '+reqs.value);
+            }
             ret[key]=val;
         }
     }
@@ -211,6 +244,7 @@ function insert(obj, key, val){
 module.exports={
     init: init,
     verifyRequest: verifyRequest,
+    verifyToken: verifyToken,
     responses: responses,
     errorCodes: errorCodes
 };
