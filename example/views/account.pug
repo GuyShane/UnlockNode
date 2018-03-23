@@ -3,4 +3,13 @@ html
   head
     title Unlock test account page
   body
-    h1 Hello #{user.email}
+    h1 Hello&nbsp;
+      span#email= user.email
+    div
+      button#logout Log out
+    div
+      button#delete Delete account
+    script(src='js/promise.min.js')
+    script(src='js/fetch.js')
+    script(src='js/cookies.min.js')
+    script(src='js/account.js')

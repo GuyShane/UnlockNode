@@ -1,5 +1,6 @@
 const http=require('http');
 const express=require('express');
+const bodyParser=require('body-parser');
 const cookieParser=require('cookie-parser');
 
 const unlock=require('../unlock');
@@ -9,6 +10,7 @@ const app=express();
 app.set('views', './example/views');
 app.set('view engine', 'pug');
 app.use(express.static('./example/public'));
+app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(unlock.verifyRequest);
 
@@ -22,6 +24,17 @@ app.get('/account', (req, res)=>{
         return;
     }
     res.render('account', res.locals.decoded);
+});
+
+app.post('/delete', (req, res)=>{
+    if (!res.locals.authenticated){
+        res.status(401).json({deleted: false});
+        return;
+    }
+    unlock.deleteUser(req.body.email)
+        .then((response)=>{
+            res.status(200).json({deleted: true});
+        });
 });
 
 const server=http.createServer(app);

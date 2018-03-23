@@ -4,7 +4,7 @@ window.onload=function(){
         email: '#email',
         onMessage: function(data){
             if (data.success){
-                document.cookie+='token='+data.token;
+                Cookies.set('token', data.token);
                 window.location.pathname='/account';
             }
             else if (typeof data.message!=='undefined'){

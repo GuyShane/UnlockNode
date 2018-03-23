@@ -1,3 +1,4 @@
+const https=require('https');
 const WebSocket=require('ws');
 const jwt=require('jsonwebtoken');
 
@@ -134,6 +135,79 @@ function listen(io, opts){
     });
 }
 
+function deleteUser(email, cb){
+    if (typeof cb==='function'){
+        return callbackDelete(email, cb);
+    }
+    else if (typeof cb==='undefined'){
+        return promiseDelete(email);
+    }
+    else {
+        throw new Error('Either pass a callback function or call as a promise');
+    }
+}
+
+function callbackDelete(email, cb){
+    let response;
+    const req=https.request({
+        hostname: 'www.unlock-auth.com',
+        method: 'POST',
+        path: '/api/delete',
+        headers: {
+            'content-type': 'application/json'
+        }
+    }, (res)=>{
+        res.on('data', (chunk)=>{
+            response=chunk;
+        });
+        res.on('end', ()=>{
+            cb(response);
+        });
+    });
+
+    req.on('error', (err)=>{
+        throw err;
+    });
+
+    req.write({
+        email: email,
+        apiKey: apiKey
+    });
+    req.end();
+}
+
+function promiseDelete(email){
+    return new Promise((resolve, reject)=>{
+        let response;
+        const req=https.request({
+            hostname: 'www.unlock-auth.com',
+            method: 'POST',
+            path: '/api/delete',
+            headers: {
+                'content-type': 'application/json'
+            }
+        }, (res)=>{
+            res.setEncoding('utf8');
+            res.on('data', (chunk)=>{
+                response=chunk;
+            });
+            res.on('end', ()=>{
+                resolve(response);
+            });
+        });
+
+        req.on('error', (err)=>{
+            reject(err);
+        });
+
+        req.write(JSON.stringify({
+            email: email,
+            apiKey: apiKey
+        }));
+        req.end();
+    });
+}
+
 function verifyToken(token){
     try {
         return jwt.verify(token, apiKey);
@@ -220,6 +294,7 @@ function insert(obj, key, val){
 
 module.exports={
     init: init,
+    deleteUser: deleteUser,
     verifyRequest: verifyRequest,
     verifyToken: verifyToken,
     responses: responses,
