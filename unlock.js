@@ -78,8 +78,8 @@ function init(opts){
         server: opts.server,
         clientTracking: true
     });
-    setInterval(function(){
-        io.clients.forEach(function(c){
+    setInterval(()=>{
+        io.clients.forEach((c)=>{
             c.ping();
         });
     }, 30000);
@@ -87,14 +87,13 @@ function init(opts){
 }
 
 function listen(io, opts){
-    io.on('connection', function(browserSocket){
-        browserSocket.on('message', function(msg){
+    io.on('connection', (browserSocket)=>{
+        browserSocket.on('message', (msg)=>{
             let browserData;
             try {
                 browserData=JSON.parse(msg);
             }
             catch(err){
-                console.log(err);
                 return;
             }
             try {
@@ -111,11 +110,10 @@ function listen(io, opts){
                 });
             }
             catch(err) {
-                console.log(err);
                 return;
             }
             const unlockSocket=new WebSocket('wss://www.unlock-auth.com');
-            unlockSocket.on('open', function(){
+            unlockSocket.on('open', ()=>{
                 const toSend={
                     type: 'unlock',
                     version: opts.version,
@@ -127,7 +125,7 @@ function listen(io, opts){
                 insert(toSend, 'requestType', opts.requestType);
                 unlockSocket.send(JSON.stringify(toSend));
             });
-            unlockSocket.on('message', function(msg){
+            unlockSocket.on('message', (msg)=>{
                 const serverData=JSON.parse(msg);
                 opts.onResponse(browserSocket, serverData);
                 unlockSocket.close();

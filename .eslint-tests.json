@@ -1,0 +1,47 @@
+{
+    "env": {
+        "browser": true
+    },
+    "extends": "eslint:recommended",
+    "parserOptions": {
+        "sourceType": "module"
+    },
+    "globals": {
+        "describe": false,
+        "beforeEach": false,
+        "it": false,
+        "sinon": false,
+        "expect": false
+    },
+    "rules": {
+        "camelcase": "error",
+        "indent": [
+            "error",
+            4
+        ],
+        "linebreak-style": [
+            "error",
+            "unix"
+        ],
+        "no-useless-escape": "off",
+        "quotes": [
+            "error",
+            "single"
+        ],
+        "semi": [
+            "error",
+            "always"
+        ],
+        "comma-dangle": [
+            "error",
+            "never"
+        ],
+        "comma-spacing": [
+            "error",
+            {
+                "before": false,
+                "after": true
+            }
+        ]
+    }
+}
