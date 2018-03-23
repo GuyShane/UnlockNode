@@ -26,15 +26,13 @@ app.get('/account', (req, res)=>{
     res.render('account', res.locals.decoded);
 });
 
-app.post('/delete', (req, res)=>{
+app.post('/delete', async (req, res)=>{
     if (!res.locals.authenticated){
         res.status(401).json({deleted: false});
         return;
     }
-    unlock.deleteUser(req.body.email)
-        .then((response)=>{
-            res.status(200).json({deleted: true});
-        });
+    await unlock.deleteUser(req.body.email);
+    res.status(200).json({deleted: true});
 });
 
 const server=http.createServer(app);

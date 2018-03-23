@@ -4,6 +4,7 @@ const jwt=require('jsonwebtoken');
 
 let apiKey;
 let cookieName;
+let io;
 
 const responses={
     UNLOCKED: 'unlocked',
@@ -73,7 +74,7 @@ function init(opts){
     apiKey=opts.apiKey;
     cookieName=opts.cookieName;
 
-    const io=new WebSocket.Server({
+    io=new WebSocket.Server({
         server: opts.server,
         clientTracking: true
     });
@@ -135,6 +136,20 @@ function listen(io, opts){
     });
 }
 
+function close(cb){
+    if (typeof cb==='function'){
+        return close(cb);
+    }
+    else if (typeof cb==='undefined'){
+        return new Promise((resolve)=>{
+            io.close(resolve);
+        });
+    }
+    else {
+        throw new Error('close should be called with a callback or as a promise');
+    }
+}
+
 function deleteUser(email, cb){
     if (typeof cb==='function'){
         return callbackDelete(email, cb);
@@ -143,7 +158,7 @@ function deleteUser(email, cb){
         return promiseDelete(email);
     }
     else {
-        throw new Error('Either pass a callback function or call as a promise');
+        throw new Error('deleteUser should be called with a callback or as a promise');
     }
 }
 
@@ -297,6 +312,7 @@ module.exports={
     deleteUser: deleteUser,
     verifyRequest: verifyRequest,
     verifyToken: verifyToken,
+    close: close,
     responses: responses,
     errorCodes: errorCodes
 };
