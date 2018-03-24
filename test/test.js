@@ -1,6 +1,10 @@
 const chai=require('chai');
 const sinon=require('sinon');
 const http=require('http');
+const express=require('express');
+const bodyParser=require('body-parser');
+const cookieParser=require('cookie-parser');
+const request=require('superagent');
 const WebSocket=require('ws');
 const jwt=require('jsonwebtoken');
 
@@ -374,6 +378,360 @@ describe('Unlock node library tests', function(){
             const token=jwt.sign({data: 'data'}, apiKey);
             const data=unlock.verifyToken(token);
             expect(data.data).to.equal('data');
+        });
+    });
+
+    describe('verifyRequest', function(){
+        const apiKey='abc123';
+
+        it('should set res.locals.authenticated to false if no token is found', async function(){
+            const app=express();
+            app.use(unlock.verifyRequest);
+            app.get('/', (req, res)=>{
+                expect(res.locals.authenticated).to.equal(false);
+                res.status(200).send();
+            });
+            const server=http.createServer(app);
+            unlock.init({
+                server: server,
+                apiKey: apiKey,
+                version: 1,
+                onResponse: function(){}
+            });
+            server.listen(3001);
+            await request
+                .get('http://localhost:3001');
+            unlock.close();
+            server.close();
+        });
+
+        describe('Token passed as a query parameter', function(){
+            it('should set res.locals.authenticated to false if an invalid token is given', async function(){
+                const app=express();
+                app.use(unlock.verifyRequest);
+                app.get('/', (req, res)=>{
+                    expect(res.locals.authenticated).to.equal(false);
+                    res.status(200).send();
+                });
+                const server=http.createServer(app);
+                unlock.init({
+                    server: server,
+                    apiKey: apiKey,
+                    version: 1,
+                    onResponse: function(){}
+                });
+                server.listen(3001);
+                await request
+                    .get('http://localhost:3001?authToken=notatoken');
+                unlock.close();
+                server.close();
+            });
+
+            it('should set res.locals.authenticated to true', async function(){
+                const app=express();
+                app.use(unlock.verifyRequest);
+                app.get('/', (req, res)=>{
+                    expect(res.locals.authenticated).to.equal(true);
+                    res.status(200).send();
+                });
+                const server=http.createServer(app);
+                unlock.init({
+                    server: server,
+                    apiKey: apiKey,
+                    version: 1,
+                    onResponse: function(){}
+                });
+                server.listen(3001);
+                const token=jwt.sign({data: 'user'}, apiKey);
+                await request
+                    .get('http://localhost:3001?authToken='+token);
+                unlock.close();
+                server.close();
+            });
+
+            it('should set res.locals.decoded to the data signed in the token', async function(){
+                const data={
+                    a: 1,
+                    b: 'b',
+                    c: {
+                        d: true
+                    }
+                };
+                const app=express();
+                app.use(unlock.verifyRequest);
+                app.get('/', (req, res)=>{
+                    expect(res.locals.decoded).to.deep.contain(data);
+                    res.status(200).send();
+                });
+                const server=http.createServer(app);
+                unlock.init({
+                    server: server,
+                    apiKey: apiKey,
+                    version: 1,
+                    onResponse: function(){}
+                });
+                server.listen(3001);
+                const token=jwt.sign(data, apiKey);
+                await request
+                    .get('http://localhost:3001?authToken='+token);
+                unlock.close();
+                server.close();
+            });
+        });
+
+        describe('Token passed as x-access-token header', function(){
+            it('should set res.locals.authennticated to false if an invalid token is given', async function(){
+                const app=express();
+                app.use(unlock.verifyRequest);
+                app.get('/', (req, res)=>{
+                    expect(res.locals.authenticated).to.equal(false);
+                    res.status(200).send();
+                });
+                const server=http.createServer(app);
+                unlock.init({
+                    server: server,
+                    apiKey: apiKey,
+                    version: 1,
+                    onResponse: function(){}
+                });
+                server.listen(3001);
+                await request
+                    .get('http://localhost:3001')
+                    .set('x-access-token', 'notatoken');
+                unlock.close();
+                server.close();
+            });
+
+            it('should set res.locals.authenticated to true', async function(){
+                const app=express();
+                app.use(unlock.verifyRequest);
+                app.get('/', (req, res)=>{
+                    expect(res.locals.authenticated).to.equal(true);
+                    res.status(200).send();
+                });
+                const server=http.createServer(app);
+                unlock.init({
+                    server: server,
+                    apiKey: apiKey,
+                    version: 1,
+                    onResponse: function(){}
+                });
+                server.listen(3001);
+                const token=jwt.sign({data: 'user'}, apiKey);
+                await request
+                    .get('http://localhost:3001')
+                    .set('x-access-token', token);
+                unlock.close();
+                server.close();
+            });
+
+            it('should set res.locals.decoded to the data signed in the token', async function(){
+                const data={
+                    a: 1,
+                    b: 'b',
+                    c: {
+                        d: true
+                    }
+                };
+                const app=express();
+                app.use(unlock.verifyRequest);
+                app.get('/', (req, res)=>{
+                    expect(res.locals.decoded).to.deep.contain(data);
+                    res.status(200).send();
+                });
+                const server=http.createServer(app);
+                unlock.init({
+                    server: server,
+                    apiKey: apiKey,
+                    version: 1,
+                    onResponse: function(){}
+                });
+                server.listen(3001);
+                const token=jwt.sign(data, apiKey);
+                await request
+                    .get('http://localhost:3001')
+                    .set('x-access-token', token);
+                unlock.close();
+                server.close();
+            });
+        });
+
+        describe('Token passed as a cookie', function(){
+            it('should set res.locals.authennticated to false if an invalid token is given', async function(){
+                const app=express();
+                app.use(cookieParser());
+                app.use(unlock.verifyRequest);
+                app.get('/setcookie', (req, res)=>{
+                    res.status(200).cookie('token_cookie', 'notatoken').send();
+                });
+                app.get('/', (req, res)=>{
+                    expect(res.locals.authenticated).to.equal(false);
+                    res.status(200).send();
+                });
+                const server=http.createServer(app);
+                unlock.init({
+                    server: server,
+                    apiKey: apiKey,
+                    version: 1,
+                    onResponse: function(){},
+                    cookieName: 'token_cookie'
+                });
+                server.listen(3001);
+                const agent=request.agent();
+                await agent
+                    .get('http://localhost:3001/setcookie');
+                await agent
+                    .get('http://localhost:3001');
+                unlock.close();
+                server.close();
+            });
+
+            it('should set res.locals.authenticated to true', async function(){
+                const app=express();
+                const token=jwt.sign({data: 'user'}, apiKey);
+                app.use(cookieParser());
+                app.use(unlock.verifyRequest);
+                app.get('/setcookie', (req, res)=>{
+                    res.status(200).cookie('token_cookie', token).send();
+                });
+                app.get('/', (req, res)=>{
+                    expect(res.locals.authenticated).to.equal(true);
+                    res.status(200).send();
+                });
+                const server=http.createServer(app);
+                unlock.init({
+                    server: server,
+                    apiKey: apiKey,
+                    version: 1,
+                    onResponse: function(){},
+                    cookieName: 'token_cookie'
+                });
+                server.listen(3001);
+                const agent=request.agent();
+                await agent
+                    .get('http://localhost:3001/setcookie');
+                await agent
+                    .get('http://localhost:3001');
+                unlock.close();
+                server.close();
+            });
+
+            it('should set res.locals.decoded to the data signed in the token', async function(){
+                const data={
+                    a: 1,
+                    b: 'b',
+                    c: {
+                        d: true
+                    }
+                };
+                const token=jwt.sign(data, apiKey);
+                const app=express();
+                app.use(cookieParser());
+                app.use(unlock.verifyRequest);
+                app.get('/setcookie', (req, res)=>{
+                    res.status(200).cookie('token_cookie', token).send();
+                });
+                app.get('/', (req, res)=>{
+                    expect(res.locals.decoded).to.deep.contain(data);
+                    res.status(200).send();
+                });
+                const server=http.createServer(app);
+                unlock.init({
+                    server: server,
+                    apiKey: apiKey,
+                    version: 1,
+                    onResponse: function(){},
+                    cookieName: 'token_cookie'
+                });
+                server.listen(3001);
+                const agent=request.agent();
+                await agent
+                    .get('http://localhost:3001/setcookie');
+                await agent
+                    .get('http://localhost:3001');
+                unlock.close();
+                server.close();
+            });
+        });
+
+        describe('Token passed in request body', function(){
+            it('should set res.locals.authennticated to false if an invalid token is given', async function(){
+                const app=express();
+                app.use(bodyParser.json());
+                app.use(unlock.verifyRequest);
+                app.post('/', (req, res)=>{
+                    expect(res.locals.authenticated).to.equal(false);
+                    res.status(200).send();
+                });
+                const server=http.createServer(app);
+                unlock.init({
+                    server: server,
+                    apiKey: apiKey,
+                    version: 1,
+                    onResponse: function(){}
+                });
+                server.listen(3001);
+                await request
+                    .post('http://localhost:3001')
+                    .send({authToken: 'notatoken'});
+                unlock.close();
+                server.close();
+            });
+
+            it('should set res.locals.authenticated to true', async function(){
+                const app=express();
+                app.use(bodyParser.json());
+                app.use(unlock.verifyRequest);
+                app.post('/', (req, res)=>{
+                    expect(res.locals.authenticated).to.equal(true);
+                    res.status(200).send();
+                });
+                const server=http.createServer(app);
+                unlock.init({
+                    server: server,
+                    apiKey: apiKey,
+                    version: 1,
+                    onResponse: function(){}
+                });
+                server.listen(3001);
+                const token=jwt.sign({data: 'user'}, apiKey);
+                await request
+                    .post('http://localhost:3001')
+                    .send({authToken: token});
+                unlock.close();
+                server.close();
+            });
+
+            it('should set res.locals.decoded to the data signed in the token', async function(){
+                const data={
+                    a: 1,
+                    b: 'b',
+                    c: {
+                        d: true
+                    }
+                };
+                const app=express();
+                app.use(bodyParser.json());
+                app.use(unlock.verifyRequest);
+                app.post('/', (req, res)=>{
+                    expect(res.locals.decoded).to.deep.contain(data);
+                    res.status(200).send();
+                });
+                const server=http.createServer(app);
+                unlock.init({
+                    server: server,
+                    apiKey: apiKey,
+                    version: 1,
+                    onResponse: function(){}
+                });
+                server.listen(3001);
+                const token=jwt.sign(data, apiKey);
+                await request
+                    .post('http://localhost:3001')
+                    .send({authToken: token});
+                unlock.close();
+                server.close();
+            });
         });
     });
 
