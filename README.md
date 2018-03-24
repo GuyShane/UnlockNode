@@ -8,6 +8,8 @@ and communicate with the Unlock servers to get you up and running with simple, s
 If you haven't set up your frontend yet, check out [this library](https://github.com/GuyShane/UnlockClient) for how to do that.
 For anything else, go to [the website](https://www.unlock-auth.com) for more information.
 
+[![Build Status](https://travis-ci.org/GuyShane/UnlockNode.svg?branch=master)](https://travis-ci.org/GuyShane/UnlockNode)
+
 ### Installing
 Install via npm:
 
