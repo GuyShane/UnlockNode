@@ -2,6 +2,7 @@ const chai=require('chai');
 const sinon=require('sinon');
 const http=require('http');
 const WebSocket=require('ws');
+const jwt=require('jsonwebtoken');
 
 const unlock=require('../unlock');
 
@@ -144,6 +145,306 @@ describe('Unlock node library tests', function(){
                 onResponse: function(){},
                 notanoption: 'notvalid'
             })).to.throw();
+        });
+
+        describe('Browser data validation', function(){
+            it('should return an error if data is not JSON', function(done){
+                const server=http.createServer();
+                unlock.init({
+                    server: server,
+                    apiKey: 'key',
+                    version: 1,
+                    onResponse: function(){}
+                });
+                server.listen(3001);
+                const socket=new WebSocket('http://localhost:3001');
+                socket.on('open', function(){
+                    socket.send('notjson');
+                });
+                socket.on('message', function(msg){
+                    const data=JSON.parse(msg);
+                    expect(data.error).to.equal(true);
+                    socket.close();
+                    unlock.close();
+                    server.close();
+                    done();
+                });
+            });
+
+            it('should return error if no data is sent', function(done){
+                const server=http.createServer();
+                unlock.init({
+                    server: server,
+                    apiKey: 'key',
+                    version: 1,
+                    onResponse: function(){}
+                });
+                server.listen(3001);
+                const socket=new WebSocket('http://localhost:3001');
+                socket.on('open', function(){
+                    socket.send(JSON.stringify({}));
+                });
+                socket.on('message', function(msg){
+                    const data=JSON.parse(msg);
+                    expect(data.error).to.equal(true);
+                    socket.close();
+                    unlock.close();
+                    server.close();
+                    done();
+                });
+            });
+
+            it('should return error if no type is sent', function(done){
+                const server=http.createServer();
+                unlock.init({
+                    server: server,
+                    apiKey: 'key',
+                    version: 1,
+                    onResponse: function(){}
+                });
+                server.listen(3001);
+                const socket=new WebSocket('http://localhost:3001');
+                socket.on('open', function(){
+                    socket.send(JSON.stringify({
+                        email: 'unlocker@email.com'
+                    }));
+                });
+                socket.on('message', function(msg){
+                    const data=JSON.parse(msg);
+                    expect(data.error).to.equal(true);
+                    socket.close();
+                    unlock.close();
+                    server.close();
+                    done();
+                });
+            });
+
+            it('should return error if no email is sent', function(done){
+                const server=http.createServer();
+                unlock.init({
+                    server: server,
+                    apiKey: 'key',
+                    version: 1,
+                    onResponse: function(){}
+                });
+                server.listen(3001);
+                const socket=new WebSocket('http://localhost:3001');
+                socket.on('open', function(){
+                    socket.send(JSON.stringify({
+                        type: 'unlock'
+                    }));
+                });
+                socket.on('message', function(msg){
+                    const data=JSON.parse(msg);
+                    expect(data.error).to.equal(true);
+                    socket.close();
+                    unlock.close();
+                    server.close();
+                    done();
+                });
+            });
+
+            it('should return error if type is not "unlock"', function(done){
+                const server=http.createServer();
+                unlock.init({
+                    server: server,
+                    apiKey: 'key',
+                    version: 1,
+                    onResponse: function(){}
+                });
+                server.listen(3001);
+                const socket=new WebSocket('http://localhost:3001');
+                socket.on('open', function(){
+                    socket.send(JSON.stringify({
+                        type: 'wrong',
+                        email: 'me@email.com'
+                    }));
+                });
+                socket.on('message', function(msg){
+                    const data=JSON.parse(msg);
+                    expect(data.error).to.equal(true);
+                    socket.close();
+                    unlock.close();
+                    server.close();
+                    done();
+                });
+            });
+
+            it('should return error is email is not a string', function(done){
+                const server=http.createServer();
+                unlock.init({
+                    server: server,
+                    apiKey: 'key',
+                    version: 1,
+                    onResponse: function(){}
+                });
+                server.listen(3001);
+                const socket=new WebSocket('http://localhost:3001');
+                socket.on('open', function(){
+                    socket.send(JSON.stringify({
+                        type: 'unlock',
+                        email: 5
+                    }));
+                });
+                socket.on('message', function(msg){
+                    const data=JSON.parse(msg);
+                    expect(data.error).to.equal(true);
+                    socket.close();
+                    unlock.close();
+                    server.close();
+                    done();
+                });
+            });
+
+            it('should return error if unexpected data is sent', function(done){
+                const server=http.createServer();
+                unlock.init({
+                    server: server,
+                    apiKey: 'key',
+                    version: 1,
+                    onResponse: function(){}
+                });
+                server.listen(3001);
+                const socket=new WebSocket('http://localhost:3001');
+                socket.on('open', function(){
+                    socket.send(JSON.stringify({
+                        type: 'unlock',
+                        email: 'mario@bowser.com',
+                        extra: 'data'
+                    }));
+                });
+                socket.on('message', function(msg){
+                    const data=JSON.parse(msg);
+                    expect(data.error).to.equal(true);
+                    socket.close();
+                    unlock.close();
+                    server.close();
+                    done();
+                });
+            });
+        });
+    });
+
+    describe('close()', function(){
+        it('should close the WebSocket server', function(done){
+            const server=http.createServer();
+            unlock.init({
+                server: server,
+                apiKey: 'key',
+                version: 1,
+                onResponse: function(){}
+            });
+            server.listen(3001);
+            const socket=new WebSocket('http://localhost:3001');
+            socket.on('open', function(){
+                unlock.close();
+            });
+            socket.on('close', function(){
+                server.close();
+                done();
+            });
+        });
+        describe('callback', function(){
+            it('should close the WebSocket server', function(done){
+                let closed;
+                const server=http.createServer();
+                unlock.init({
+                    server: server,
+                    apiKey: 'key',
+                    version: 1,
+                    onResponse: function(){}
+                });
+                server.listen(3001);
+                const socket=new WebSocket('http://localhost:3001');
+                socket.on('open', function(){
+                    unlock.close(function(){
+                        closed=true;
+                    });
+                });
+                socket.on('close', function(){
+                    server.close();
+                    expect(closed).to.equal(true);
+                    done();
+                });
+            });
+        });
+
+        describe('promise', function(){
+            it('should close the WebSocket server', function(done){
+                let closed;
+                const server=http.createServer();
+                unlock.init({
+                    server: server,
+                    apiKey: 'key',
+                    version: 1,
+                    onResponse: function(){}
+                });
+                server.listen(3001);
+                const socket=new WebSocket('http://localhost:3001');
+                socket.on('open', function(){
+                    unlock.close()
+                        .then(()=>{
+                            closed=true;
+                        });
+                });
+                socket.on('close', function(){
+                    server.close();
+                    expect(closed).to.equal(true);
+                    done();
+                });
+            });
+        });
+    });
+
+    describe('verifyToken()', function(){
+        const apiKey='123key';
+
+        it('should return null if not given a token', function(){
+            const server=http.createServer();
+            unlock.init({
+                server: server,
+                apiKey: apiKey,
+                version: 1,
+                onResponse: function(){}
+            });
+            expect(unlock.verifyToken()).to.be.null;
+        });
+
+        it('should return null for a token signed with the wrong secret', function(){
+            const server=http.createServer();
+            unlock.init({
+                server: server,
+                apiKey: apiKey,
+                version: 1,
+                onResponse: function(){}
+            });
+            const token=jwt.sign({data: 'data'}, 'otherkey');
+            expect(unlock.verifyToken(token)).to.be.null;
+        });
+
+        it('should return an object if given a valid token', function(){
+            const server=http.createServer();
+            unlock.init({
+                server: server,
+                apiKey: apiKey,
+                version: 1,
+                onResponse: function(){}
+            });
+            const token=jwt.sign({data: 'data'}, apiKey);
+            expect(unlock.verifyToken(token)).to.be.an('object');
+        });
+
+        it('should return the data signed in the token', function(){
+            const server=http.createServer();
+            unlock.init({
+                server: server,
+                apiKey: apiKey,
+                version: 1,
+                onResponse: function(){}
+            });
+            const token=jwt.sign({data: 'data'}, apiKey);
+            const data=unlock.verifyToken(token);
+            expect(data.data).to.equal('data');
         });
     });
 

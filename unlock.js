@@ -94,6 +94,10 @@ function listen(io, opts){
                 browserData=JSON.parse(msg);
             }
             catch(err){
+                browserSocket.send(JSON.stringify({
+                    error: true,
+                    message: 'Could not parse data as JSON'
+                }));
                 return;
             }
             try {
@@ -110,6 +114,10 @@ function listen(io, opts){
                 });
             }
             catch(err) {
+                browserSocket.send(JSON.stringify({
+                    error: true,
+                    message: 'Invalid request body. Need to send type "unlock" as well as an email'
+                }));
                 return;
             }
             const unlockSocket=new WebSocket('wss://www.unlock-auth.com');
@@ -136,7 +144,7 @@ function listen(io, opts){
 
 function close(cb){
     if (typeof cb==='function'){
-        return close(cb);
+        return io.close(cb);
     }
     else if (typeof cb==='undefined'){
         return new Promise((resolve)=>{
