@@ -325,7 +325,168 @@ describe('Unlock node library tests', function(){
         });
     });
 
+    describe('verifyToken()', function(){
+        const apiKey='123key';
+
+        it('should return null if not given a token', function(){
+            const server=http.createServer();
+            unlock.init({
+                server: server,
+                apiKey: apiKey,
+                version: 1,
+                onResponse: function(){}
+            });
+            expect(unlock.verifyToken()).to.be.null;
+        });
+
+        it('should return null for a token signed with the wrong secret', function(){
+            const server=http.createServer();
+            unlock.init({
+                server: server,
+                apiKey: apiKey,
+                version: 1,
+                onResponse: function(){}
+            });
+            const token=jwt.sign({data: 'data'}, 'otherkey');
+            expect(unlock.verifyToken(token)).to.be.null;
+        });
+
+        it('should return an object if given a valid token', function(){
+            const server=http.createServer();
+            unlock.init({
+                server: server,
+                apiKey: apiKey,
+                version: 1,
+                onResponse: function(){}
+            });
+            const token=jwt.sign({data: 'data'}, apiKey);
+            expect(unlock.verifyToken(token)).to.be.an('object');
+        });
+
+        it('should return the data signed in the token', function(){
+            const server=http.createServer();
+            unlock.init({
+                server: server,
+                apiKey: apiKey,
+                version: 1,
+                onResponse: function(){}
+            });
+            const token=jwt.sign({data: 'data'}, apiKey);
+            const data=unlock.verifyToken(token);
+            expect(data.data).to.equal('data');
+        });
+    });
+
+    describe('deleteUser()', function(){
+        it('should throw an error if cb is defined and not a function', function(){
+            expect(unlock.deleteUser.bind(null, 'email@error.com', true)).to.throw();
+        });
+
+        describe('callback', function(){
+            it('should fail if given an invalid API key', function(done){
+                const server=http.createServer();
+                unlock.init({
+                    server: server,
+                    apiKey: 'key',
+                    version: 1,
+                    onResponse: function(){}
+                });
+                unlock.deleteUser('e@mail.com', function(response){
+                    expect(response.statusCode).to.equal(400);
+                    done();
+                });
+            });
+
+            it('should fail if given an email that doesn\'t exist', function(done){
+                const server=http.createServer();
+                unlock.init({
+                    server: server,
+                    apiKey: process.env.UNLOCK_TEST_API_KEY,
+                    version: 1,
+                    onResponse: function(){}
+                });
+                unlock.deleteUser('notanemail@viktor.krum', function(response){
+                    expect(response.statusCode).to.equal(400);
+                    done();
+                });
+            });
+
+            it('should return the user\'s data', function(done){
+                const server=http.createServer();
+                unlock.init({
+                    server: server,
+                    apiKey: process.env.UNLOCK_TEST_API_KEY,
+                    version: 1,
+                    onResponse: function(){}
+                });
+                unlock.deleteUser(process.env.UNLOCK_TEST_EMAIL, function(response){
+                    expect(response).to.have.property('username');
+                    expect(response).to.have.property('developer');
+                    expect(response).to.have.property('created');
+                    expect(response).to.have.property('updated');
+                    expect(response.email).to.equal(process.env.UNLOCK_TEST_EMAIL);
+                    done();
+                });
+            });
+        });
+
+        describe('promise', function(){
+            it('should fail if given an invalid API key', function(done){
+                const server=http.createServer();
+                unlock.init({
+                    server: server,
+                    apiKey: 'key',
+                    version: 1,
+                    onResponse: function(){}
+                });
+                unlock.deleteUser('e@mail.com')
+                    .then((response)=>{
+                        expect(response.statusCode).to.equal(400);
+                        done();
+                    });
+            });
+
+            it('should fail if given an email that doesn\'t exist', function(done){
+                const server=http.createServer();
+                unlock.init({
+                    server: server,
+                    apiKey: process.env.UNLOCK_TEST_API_KEY,
+                    version: 1,
+                    onResponse: function(){}
+                });
+                unlock.deleteUser('notanemail@viktor.krum')
+                    .then((response)=>{
+                        expect(response.statusCode).to.equal(400);
+                        done();
+                    });
+            });
+
+            it('should return the user\'s data', function(done){
+                const server=http.createServer();
+                unlock.init({
+                    server: server,
+                    apiKey: process.env.UNLOCK_TEST_API_KEY,
+                    version: 1,
+                    onResponse: function(){}
+                });
+                unlock.deleteUser(process.env.UNLOCK_TEST_EMAIL)
+                    .then((response)=>{
+                        expect(response).to.have.property('username');
+                        expect(response).to.have.property('developer');
+                        expect(response).to.have.property('created');
+                        expect(response).to.have.property('updated');
+                        expect(response.email).to.equal(process.env.UNLOCK_TEST_EMAIL);
+                        done();
+                    });
+            });
+        });
+    });
+
     describe('close()', function(){
+        it('should throw an error if cb is defined and not a function', function(){
+            expect(unlock.close.bind(null, 'callback')).to.throw();
+        });
+
         it('should close the WebSocket server', function(done){
             const server=http.createServer();
             unlock.init({
@@ -393,58 +554,6 @@ describe('Unlock node library tests', function(){
                     done();
                 });
             });
-        });
-    });
-
-    describe('verifyToken()', function(){
-        const apiKey='123key';
-
-        it('should return null if not given a token', function(){
-            const server=http.createServer();
-            unlock.init({
-                server: server,
-                apiKey: apiKey,
-                version: 1,
-                onResponse: function(){}
-            });
-            expect(unlock.verifyToken()).to.be.null;
-        });
-
-        it('should return null for a token signed with the wrong secret', function(){
-            const server=http.createServer();
-            unlock.init({
-                server: server,
-                apiKey: apiKey,
-                version: 1,
-                onResponse: function(){}
-            });
-            const token=jwt.sign({data: 'data'}, 'otherkey');
-            expect(unlock.verifyToken(token)).to.be.null;
-        });
-
-        it('should return an object if given a valid token', function(){
-            const server=http.createServer();
-            unlock.init({
-                server: server,
-                apiKey: apiKey,
-                version: 1,
-                onResponse: function(){}
-            });
-            const token=jwt.sign({data: 'data'}, apiKey);
-            expect(unlock.verifyToken(token)).to.be.an('object');
-        });
-
-        it('should return the data signed in the token', function(){
-            const server=http.createServer();
-            unlock.init({
-                server: server,
-                apiKey: apiKey,
-                version: 1,
-                onResponse: function(){}
-            });
-            const token=jwt.sign({data: 'data'}, apiKey);
-            const data=unlock.verifyToken(token);
-            expect(data.data).to.equal('data');
         });
     });
 

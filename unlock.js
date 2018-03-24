@@ -178,11 +178,12 @@ function callbackDelete(email, cb){
             'content-type': 'application/json'
         }
     }, (res)=>{
+        res.setEncoding('utf8');
         res.on('data', (chunk)=>{
             response=chunk;
         });
         res.on('end', ()=>{
-            cb(response);
+            cb(JSON.parse(response));
         });
     });
 
@@ -190,10 +191,10 @@ function callbackDelete(email, cb){
         throw err;
     });
 
-    req.write({
+    req.write(JSON.stringify({
         email: email,
         apiKey: apiKey
-    });
+    }));
     req.end();
 }
 
@@ -213,7 +214,7 @@ function promiseDelete(email){
                 response=chunk;
             });
             res.on('end', ()=>{
-                resolve(response);
+                resolve(JSON.parse(response));
             });
         });
 
