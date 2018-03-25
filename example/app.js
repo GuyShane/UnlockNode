@@ -10,7 +10,7 @@ const app=express();
 app.set('views', './example/views');
 app.set('view engine', 'pug');
 app.use(express.static('./example/public'));
-app.use(bodyParser.json()); //Forgetting the body of the post request
+app.use(bodyParser.json()); //For getting the body of the post request
 app.use(cookieParser()); //Only needed if you're using cookies to pass tokens
 app.use(unlock.verifyRequest); //Authentication middleware
 
