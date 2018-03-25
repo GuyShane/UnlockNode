@@ -13,6 +13,49 @@ const unlock=require('../unlock');
 const expect=chai.expect;
 
 describe('Unlock node library tests', function(){
+    it('should start a WebSocket server', function(done){
+        const server=http.createServer();
+        unlock.init({
+            server: server,
+            apiKey: 'key',
+            version: 1,
+            onResponse: function(){}
+        });
+        server.listen(3001);
+        const socket=new WebSocket('http://localhost:3001');
+        socket.on('open', function(){
+            socket.close();
+            unlock.close();
+            server.close();
+            done();
+        });
+    });
+
+    it('should send a ping every 30 seconds', function(done){
+        const clock=sinon.useFakeTimers({
+            shouldAdvanceTime: true
+        });
+        const server=http.createServer();
+        unlock.init({
+            server: server,
+            apiKey: 'key',
+            version: 1,
+            onResponse: function(){}
+        });
+        server.listen(3001);
+        const socket=new WebSocket('http://localhost:3001');
+        socket.on('ping', function(){
+            clock.restore();
+            socket.close();
+            unlock.close();
+            server.close();
+            done();
+        });
+        socket.on('open', function(){
+            clock.tick(31000);
+        });
+    });
+
     describe('Options validation', function(){
         it('should fail if not options are given', function(){
             expect(unlock.init.bind()).to.throw();
@@ -912,49 +955,6 @@ describe('Unlock node library tests', function(){
                     done();
                 });
             });
-        });
-    });
-
-    it('should start a WebSocket server', function(done){
-        const server=http.createServer();
-        unlock.init({
-            server: server,
-            apiKey: 'key',
-            version: 1,
-            onResponse: function(){}
-        });
-        server.listen(3001);
-        const socket=new WebSocket('http://localhost:3001');
-        socket.on('open', function(){
-            socket.close();
-            unlock.close();
-            server.close();
-            done();
-        });
-    });
-
-    it('should send a ping every 30 seconds', function(done){
-        const clock=sinon.useFakeTimers({
-            shouldAdvanceTime: true
-        });
-        const server=http.createServer();
-        unlock.init({
-            server: server,
-            apiKey: 'key',
-            version: 1,
-            onResponse: function(){}
-        });
-        server.listen(3001);
-        const socket=new WebSocket('http://localhost:3001');
-        socket.on('ping', function(){
-            clock.restore();
-            socket.close();
-            unlock.close();
-            server.close();
-            done();
-        });
-        socket.on('open', function(){
-            clock.tick(31000);
         });
     });
 });
