@@ -1,4 +1,5 @@
 window.onload=function(){
+    /*In this case, logging out is just getting rid of the authentication token.*/
     function logout(){
         Cookies.expire('token');
         window.location.reload();
@@ -8,6 +9,7 @@ window.onload=function(){
         logout();
     });
 
+    /*This is how you would make any authenticated request. In this case deleting a user's account.*/
     document.querySelector('#delete').addEventListener('click', function(){
         var h=new Headers();
         h.append('x-access-token', Cookies.get('token'));
