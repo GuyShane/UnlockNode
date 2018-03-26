@@ -54,11 +54,11 @@ The behaviour can be set as follows:
 | server | object | required | - | The http server object to use for creating a WebSocket server |
 | apiKey | string | required | - | Your private Unlock developer's API key. This will be used to sign tokens and verify your identity as a developer |
 | version | number | required | - | Which version of the Unlock API you would like to use |
-| onResponse | function | required | - | A function to be called when your server receives a response from the Unlock servers. The function is called with two parameters: onResponse(socket, data). The first is the [socket connection](https://github.com/websockets/ws/blob/master/doc/ws.md#class-websocket) to the client, and the second is the data received as an object. |
-| makePayload | function | optional | - | A function to be called before each request is sent to set any additional data you would like to be signed in your authentication JWT. The function is passed one parameter: makePayload(email). It is the amil address of the user making the request |
+| onResponse | function | required | - | A function to be called when your server receives a response from the Unlock servers. The function is called with two parameters: `onResponse(socket, data)`. The first is the [socket connection](https://github.com/websockets/ws/blob/master/doc/ws.md#class-websocket) to the client, and the second is the data received as an object. |
+| makePayload | function | optional | - | A function to be called before each request is sent to set any additional data you would like to be signed in your authentication JWT. The function is passed one parameter: `makePayload(email)`. It is the email address of the user making the request |
 | cookieName | string | optional | - | If you store the authentication JWT in a cookie, this is the name with which it is saved. This option is only needed if you are using the provided express middleware and you would like it to verify requests using cookies |
 | exp | number | optional | 86400 | The expiration time of the authentication JWT, measured in seconds from issuance. Defaults to 24 hours. Set this to -1 to specify no expiration time |
-| requestType | string | optional | 'unlock' | The request type to be displayed to users. If they are not yet registered to your site, the request type will always be 'register', but subsequent requests will use this. Defaults to 'unlock' to specify a standard login request, but if you are making something other than standard account login, for example pushing code to a remote repository, you can specify they type as you see fit. |
+| requestType | string | optional | 'unlock' | The request type to be displayed to users. If they are not yet registered to your site, the request type will always be `'register'`, but subsequent requests will use this. Defaults to `'unlock'` to specify a standard login request, but if you are making something other than standard account login, for example pushing code to a remote repository, you can specify they type as you see fit. |
 
 #### unlock.verifyRequest(req, res, next)
 Express compatible middleware which verifies authenticated requests based on a JWT. 
@@ -95,7 +95,7 @@ res.locals.authenticated=true;
 res.locals.decoded=tokenData;
 ```
 tokenData will be the decoded data signed in the JWT. This will contain information about the user who made the request,
-as well as any payload data yo specified using makePayload().
+as well as any payload data you specified using `makePayload()`.
 
 Invalid or no JWT will result in:
 ```js
@@ -104,7 +104,7 @@ res.locals.authenticated=false;
 
 #### unlock.verifyToken(token)
 If you're not using express, or you'd prefer not to use the middleware, this function attempts to decode a JWT.
-If the token is valid, this will return an object conatining the data signed in the JWT, otherwise it will return null.
+If the token is valid, this will return an object containing the data signed in the JWT, otherwise it will return null.
 
 #### unlock.responses
 This is an object listing the types of possible responses you can expect from the Unlock servers.
