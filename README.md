@@ -15,10 +15,6 @@ Install via npm:
 
 `npm install --save unlock-node`
 
-or yarn:
-
-`yarn add --peer node-unlock`
-
 then just require it in your app:
 ```js
 const unlock=require('unlock-node');
