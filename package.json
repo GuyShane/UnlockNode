@@ -1,9 +1,11 @@
 {
     "name": "unlock-node",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "A Node.js library for communicating with Unlock",
     "main": "unlock.js",
-    "files": ["unlock.js"],
+    "files": [
+        "unlock.js"
+    ],
     "scripts": {
         "test": "./node_modules/mocha/bin/mocha --exit"
     },
