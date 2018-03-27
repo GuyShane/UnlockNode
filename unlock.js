@@ -136,7 +136,6 @@ function listen(io, opts){
             unlockSocket.on('message', (msg)=>{
                 const serverData=JSON.parse(msg);
                 opts.onResponse(browserSocket, serverData);
-                unlockSocket.close();
             });
         });
     });
