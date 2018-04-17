@@ -47,10 +47,10 @@ The behaviour can be set as follows:
 
 | Name | Type | Attributes | Default | Description |
 | ---- | ---- | ---------- | ------- | ----------- |
-| server | object | required | - | The http server object to use for creating a WebSocket server |
-| apiKey | string | required | - | Your private Unlock developer's API key. This will be used to sign tokens and verify your identity as a developer |
-| version | number | required | - | Which version of the Unlock API you would like to use |
-| onResponse | function | required | - | A function to be called when your server receives a response from the Unlock servers. The function is called with two parameters: `onResponse(socket, data)`. The first is the [socket connection](https://github.com/websockets/ws/blob/master/doc/ws.md#class-websocket) to the client, and the second is the data received as an object. See the [API documentation](https://www.unlock-auth.com/documentation#6_receiving_a_response_from_unlock) for a description of the response object. You can then decide whether or not you'd like to close the socket connection from either end. |
+| server | object | **required** | - | The http server object to use for creating a WebSocket server |
+| apiKey | string | **required** | - | Your private Unlock developer's API key. This will be used to sign tokens and verify your identity as a developer |
+| version | number | **required** | - | Which version of the Unlock API you would like to use |
+| onResponse | function | **required** | - | A function to be called when your server receives a response from the Unlock servers. The function is called with two parameters: `onResponse(socket, data)`. The first is the [socket connection](https://github.com/websockets/ws/blob/master/doc/ws.md#class-websocket) to the client, and the second is the data received as an object. See the [API documentation](https://www.unlock-auth.com/documentation#6_receiving_a_response_from_unlock) for a description of the response object. You can then decide whether or not you'd like to close the socket connection from either end. |
 | makePayload | function | optional | - | A function to be called before each request is sent to set any additional data you would like to be signed in your authentication JWT. The function is passed one parameter: `makePayload(email)`. It is the email address of the user making the request |
 | cookieName | string | optional | - | If you store the authentication JWT in a cookie, this is the name with which it is saved. This option is only needed if you are using the provided express middleware and you would like it to verify requests using cookies |
 | exp | number | optional | 86400 | The expiration time of the authentication JWT, measured in seconds from issuance. Defaults to 24 hours. Set this to -1 to specify no expiration time |
@@ -101,6 +101,24 @@ res.locals.authenticated=false;
 #### unlock.verifyToken(token)
 If you're not using express, or you'd prefer not to use the middleware, this function attempts to decode a JWT.
 If the token is valid, this will return an object containing the data signed in the JWT, otherwise it will return null.
+
+#### unlock.deleteUser(email, [callback])
+Sends a request to Unlock to delete a user's account from your site. This does not delete the user's data from Unlock, it just removes them from your site's list of registered users. If they would like to continue using your site in the future, they will simply have to register through Unlock again.
+
+This can be called using either callback or Promise mode. If `callback` is supplied and is a function, it will be called after the successful deletion of the user. Otherwise, leave `callback` undefined to use it as a Promise. The result of the operation will be the updated user object after deletion, which will can be accessed in the callback or the promise chain.
+
+```js
+// Callback mode
+unlock.deleteUser('its@me.mario', function(res){
+    console.log(res);
+});
+
+// Promise mode
+unlock.deleteUser('its@me.mario')
+    .then(function(response){
+        console.log(response);
+    });
+```
 
 #### unlock.responses
 This is an object listing the types of possible responses you can expect from the Unlock servers.
