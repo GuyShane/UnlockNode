@@ -1,6 +1,6 @@
 {
     "name": "unlock-node",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "A Node.js library for communicating with Unlock",
     "main": "unlock.js",
     "files": [
