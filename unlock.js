@@ -16,11 +16,8 @@ const errorCodes={
     USER_NOT_FOUND: 0,
     USER_DECLINED: 1,
     INVALID_TOKEN: 2,
-    BAD_PASS: 4,
     NAME_USED: 5,
     EMAIL_USED: 6,
-    PASS_MISMATCH: 7,
-    PASS_INVALID: 8,
     ACTIVE_REQUEST: 9,
     NO_RESPONSE: 10,
     NOT_REGISTERED: 11,
@@ -110,6 +107,11 @@ function listen(io, opts){
                     email: {
                         required: true,
                         type: 'string'
+                    },
+                    extra: {
+                        required: false,
+                        type: 'object',
+                        default: undefined
                     }
                 });
             }
@@ -127,7 +129,7 @@ function listen(io, opts){
                     version: opts.version,
                     email: browserData.email,
                     apiKey: opts.apiKey,
-                    payload: opts.makePayload(browserData.email)
+                    payload: opts.makePayload(browserData.email, browserData.extra)
                 };
                 insert(toSend, 'exp', opts.exp);
                 insert(toSend, 'requestType', opts.requestType);

@@ -7,7 +7,8 @@
         "unlock.js"
     ],
     "scripts": {
-        "test": "./node_modules/mocha/bin/mocha --exit"
+        "test": "./node_modules/mocha/bin/mocha --exit",
+        "gulp": "./node_modules/gulp/bin/gulp.js"
     },
     "repository": {
         "type": "git",
@@ -39,6 +40,7 @@
         "superagent": "^3.8.2"
     },
     "dependencies": {
+        "dotenv": "^6.1.0",
         "jsonwebtoken": "^8.2.0",
         "ws": "5.0.0"
     }

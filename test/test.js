@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const chai=require('chai');
 const sinon=require('sinon');
 const http=require('http');
@@ -343,7 +345,7 @@ describe('Unlock node library tests', function(){
                 });
             });
 
-            it('should return error if unexpected data is sent', function(done){
+            it('should return error if extra is sent and is not an object', function(done){
                 const server=http.createServer();
                 unlock.init({
                     server: server,
@@ -356,8 +358,8 @@ describe('Unlock node library tests', function(){
                 socket.on('open', function(){
                     socket.send(JSON.stringify({
                         type: 'unlock',
-                        email: 'mario@bowser.com',
-                        extra: 'data'
+                        email: 'me@email.com',
+                        extra: 'just a string'
                     }));
                 });
                 socket.on('message', function(msg){
@@ -821,7 +823,6 @@ describe('Unlock node library tests', function(){
                     onResponse: function(){}
                 });
                 unlock.deleteUser(process.env.UNLOCK_TEST_EMAIL, function(response){
-                    expect(response).to.have.property('username');
                     expect(response).to.have.property('developer');
                     expect(response).to.have.property('created');
                     expect(response).to.have.property('updated');
@@ -872,7 +873,6 @@ describe('Unlock node library tests', function(){
                 });
                 unlock.deleteUser(process.env.UNLOCK_TEST_EMAIL)
                     .then((response)=>{
-                        expect(response).to.have.property('username');
                         expect(response).to.have.property('developer');
                         expect(response).to.have.property('created');
                         expect(response).to.have.property('updated');

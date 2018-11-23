@@ -2,7 +2,7 @@
 
 ## A Node.js library for authenticating with Unlock
 
-This is a library to include in your node.js app which will accept requests from an Unlock enabled frontend, 
+This is a library to include in your node.js app which will accept requests from an Unlock enabled frontend,
 and communicate with the Unlock servers to get you up and running with simple, socket-based, passwordless authentication.
 
 If you haven't set up your frontend yet, check out [this library](https://github.com/GuyShane/UnlockClient) for how to do that.
@@ -51,13 +51,13 @@ The behaviour can be set as follows:
 | apiKey | string | **required** | - | Your private Unlock developer's API key. This will be used to sign tokens and verify your identity as a developer |
 | version | number | **required** | - | Which version of the Unlock API you would like to use |
 | onResponse | function | **required** | - | A function to be called when your server receives a response from the Unlock servers. The function is called with two parameters: `onResponse(socket, data)`. The first is the [socket connection](https://github.com/websockets/ws/blob/master/doc/ws.md#class-websocket) to the client, and the second is the data received as an object. See the [API documentation](https://www.unlock-auth.com/documentation#6_receiving_a_response_from_unlock) for a description of the response object. You can then decide whether or not you'd like to close the socket connection from either end. |
-| makePayload | function | optional | - | A function to be called before each request is sent to set any additional data you would like to be signed in your authentication JWT. The function is passed one parameter: `makePayload(email)`. It is the email address of the user making the request |
+| makePayload | function | optional | - | A function to be called before each request is sent to set any additional data you would like to be signed in your authentication JWT. The function is passed two parameters: `makePayload(email, extra)`. `email` is the email address of the user making the request, and `extra` is any additional data sent from the browser. If no extra data was specified, `extra` will be undefined |
 | cookieName | string | optional | - | If you store the authentication JWT in a cookie, this is the name with which it is saved. This option is only needed if you are using the provided express middleware and you would like it to verify requests using cookies |
 | exp | number | optional | 86400 | The expiration time of the authentication JWT, measured in seconds from issuance. Defaults to 24 hours. Set this to -1 to specify no expiration time |
 | requestType | string | optional | 'unlock' | The request type to be displayed to users. If they are not yet registered to your site, the request type will always be `'register'`, but subsequent requests will use this. Defaults to `'unlock'` to specify a standard login request, but if you are making something other than standard account login, for example pushing code to a remote repository, you can specify they type as you see fit. |
 
 #### unlock.verifyRequest(req, res, next)
-Express compatible middleware which verifies authenticated requests based on a JWT. 
+Express compatible middleware which verifies authenticated requests based on a JWT.
 ```js
 const http=require('http');
 const express=require('express');
