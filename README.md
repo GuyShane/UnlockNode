@@ -5,8 +5,7 @@
 This is a library to include in your node.js app which will accept requests from an Unlock enabled frontend,
 and communicate with the Unlock servers to get you up and running with simple, socket-based, passwordless authentication.
 
-If you haven't set up your frontend yet, check out [this library](https://github.com/GuyShane/UnlockClient) for how to do that.
-For anything else, go to [the website](https://www.unlock-auth.com) for more information.
+If you haven't set up your frontend yet, check out [the website](https://unlock-app.com/documentation) for how to do that.
 
 [![Build Status](https://travis-ci.org/GuyShane/UnlockNode.svg?branch=master)](https://travis-ci.org/GuyShane/UnlockNode)
 
@@ -50,7 +49,7 @@ The behaviour can be set as follows:
 | server | object | **required** | - | The http server object to use for creating a WebSocket server |
 | apiKey | string | **required** | - | Your private Unlock developer's API key. This will be used to sign tokens and verify your identity as a developer |
 | version | number | **required** | - | Which version of the Unlock API you would like to use |
-| onResponse | function | **required** | - | A function to be called when your server receives a response from the Unlock servers. The function is called with two parameters: `onResponse(socket, data)`. The first is the [socket connection](https://github.com/websockets/ws/blob/master/doc/ws.md#class-websocket) to the client, and the second is the data received as an object. See the [API documentation](https://www.unlock-auth.com/documentation#6_receiving_a_response_from_unlock) for a description of the response object. You can then decide whether or not you'd like to close the socket connection from either end. |
+| onResponse | function | **required** | - | A function to be called when your server receives a response from the Unlock servers. The function is called with two parameters: `onResponse(socket, data)`. The first is the [socket connection](https://github.com/websockets/ws/blob/master/doc/ws.md#class-websocket) to the client, and the second is the data received as an object. See the [API documentation](https://www.unlock-app.com/documentation) for a description of the response object. You can then decide whether or not you'd like to close the socket connection from either end. |
 | makePayload | function | optional | - | A function to be called before each request is sent to set any additional data you would like to be signed in your authentication JWT. The function is passed two parameters: `makePayload(email, extra)`. `email` is the email address of the user making the request, and `extra` is any additional data sent from the browser. If no extra data was specified, `extra` will be undefined |
 | cookieName | string | optional | - | If you store the authentication JWT in a cookie, this is the name with which it is saved. This option is only needed if you are using the provided express middleware and you would like it to verify requests using cookies |
 | exp | number | optional | 86400 | The expiration time of the authentication JWT, measured in seconds from issuance. Defaults to 24 hours. Set this to -1 to specify no expiration time |
@@ -135,20 +134,21 @@ This is an object listing the possible error codes you can receive describing wh
 ```js
 const errorCodes={
     USER_NOT_FOUND: 0,
-    USER_DECLINED: 1,
-    INVALID_TOKEN: 2,
-    ACTIVE_REQUEST: 9,
-    NO_RESPONSE: 10,
-    NOT_VERIFIED: 12,
-    TOO_SOON: 14,
-    USERS_EXCEEDED: 15,
-    REQUESTS_EXCEEDED: 16,
-    INVALID_API_KEY: 21,
-    APP_DISABLED: 23
+    APP_NOT_FOUND: 1,
+    APP_DISABLED: 2,
+    NOT_VERIFIED: 3,
+    TOO_SOON: 4,
+    ACTIVE_REQUEST: 5,
+    USER_DECLINED: 6,
+    NO_RESPONSE: 7,
+    USERS_EXCEEDED: 8,
+    REQUESTS_EXCEEDED: 9,
+    INVALID_TOKEN: 10,
+    INTERNAL_ERROR: 11
 };
 ```
 
 ### License
 [MIT](https://opensource.org/licenses/MIT)
 
-Copyright (c) 2018 Shane Brass
+Copyright (c) 2019 Shane Brass

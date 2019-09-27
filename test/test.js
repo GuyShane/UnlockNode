@@ -795,7 +795,8 @@ describe('Unlock node library tests', function(){
                     onResponse: function(){}
                 });
                 unlock.deleteUser('e@mail.com', function(response){
-                    expect(response.statusCode).to.equal(400);
+                    expect(response.status).to.equal(400);
+                    expect(response.data).to.have.own.property('message');
                     done();
                 });
             });
@@ -809,7 +810,8 @@ describe('Unlock node library tests', function(){
                     onResponse: function(){}
                 });
                 unlock.deleteUser('notanemail@viktor.krum', function(response){
-                    expect(response.statusCode).to.equal(400);
+                    expect(response.status).to.equal(400);
+                    expect(response.data).to.have.own.property('message');
                     done();
                 });
             });
@@ -823,10 +825,13 @@ describe('Unlock node library tests', function(){
                     onResponse: function(){}
                 });
                 unlock.deleteUser(process.env.UNLOCK_TEST_EMAIL, function(response){
-                    expect(response).to.have.property('developer');
-                    expect(response).to.have.property('created');
-                    expect(response).to.have.property('updated');
-                    expect(response.email).to.equal(process.env.UNLOCK_TEST_EMAIL);
+                    const user=response.data.user;
+                    expect(user).to.have.own.property('developer');
+                    expect(user).to.have.own.property('verified');
+                    expect(user).to.have.own.property('registered');
+                    expect(user).to.have.own.property('created');
+                    expect(user).to.have.own.property('id');
+                    expect(user.email).to.equal(process.env.UNLOCK_TEST_EMAIL);
                     done();
                 });
             });
@@ -843,7 +848,8 @@ describe('Unlock node library tests', function(){
                 });
                 unlock.deleteUser('e@mail.com')
                     .then((response)=>{
-                        expect(response.statusCode).to.equal(400);
+                        expect(response.status).to.equal(400);
+                        expect(response.data).to.have.own.property('message');
                         done();
                     });
             });
@@ -858,7 +864,8 @@ describe('Unlock node library tests', function(){
                 });
                 unlock.deleteUser('notanemail@viktor.krum')
                     .then((response)=>{
-                        expect(response.statusCode).to.equal(400);
+                        expect(response.status).to.equal(400);
+                        expect(response.data).to.have.own.property('message');
                         done();
                     });
             });
@@ -873,10 +880,13 @@ describe('Unlock node library tests', function(){
                 });
                 unlock.deleteUser(process.env.UNLOCK_TEST_EMAIL)
                     .then((response)=>{
-                        expect(response).to.have.property('developer');
-                        expect(response).to.have.property('created');
-                        expect(response).to.have.property('updated');
-                        expect(response.email).to.equal(process.env.UNLOCK_TEST_EMAIL);
+                        const user=response.data.user;
+                        expect(user).to.have.own.property('developer');
+                        expect(user).to.have.own.property('verified');
+                        expect(user).to.have.own.property('registered');
+                        expect(user).to.have.own.property('created');
+                        expect(user).to.have.own.property('id');
+                        expect(user.email).to.equal(process.env.UNLOCK_TEST_EMAIL);
                         done();
                     });
             });

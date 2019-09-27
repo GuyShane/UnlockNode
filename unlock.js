@@ -1,6 +1,11 @@
-const https=require('https');
+const axios=require('axios');
 const WebSocket=require('ws');
 const jwt=require('jsonwebtoken');
+
+const requester=axios.create({
+    baseURL: 'https://www.unlock-app.com',
+    validateStatus: status=>status>=200 && status<500
+});
 
 let apiKey;
 let cookieName;
@@ -14,18 +19,17 @@ const responses={
 
 const errorCodes={
     USER_NOT_FOUND: 0,
-    USER_DECLINED: 1,
-    INVALID_TOKEN: 2,
-    NAME_USED: 5,
-    EMAIL_USED: 6,
-    ACTIVE_REQUEST: 9,
-    NO_RESPONSE: 10,
-    NOT_REGISTERED: 11,
-    NOT_VERIFIED: 12,
-    TOO_SOON: 14,
-    USERS_EXCEEDED: 15,
-    REQUESTS_EXCEEDED: 16,
-    INVALID_API_KEY: 21
+    APP_NOT_FOUND: 1,
+    APP_DISABLED: 2,
+    NOT_VERIFIED: 3,
+    TOO_SOON: 4,
+    ACTIVE_REQUEST: 5,
+    USER_DECLINED: 6,
+    NO_RESPONSE: 7,
+    USERS_EXCEEDED: 8,
+    REQUESTS_EXCEEDED: 9,
+    INVALID_TOKEN: 10,
+    INTERNAL_ERROR: 11
 };
 
 function init(opts){
@@ -122,7 +126,7 @@ function listen(io, opts){
                 }));
                 return;
             }
-            const unlockSocket=new WebSocket('wss://www.unlock-auth.com');
+            const unlockSocket=new WebSocket('wss://www.unlock-app.com');
             unlockSocket.on('open', ()=>{
                 const toSend={
                     type: 'unlock',
@@ -170,64 +174,30 @@ function deleteUser(email, cb){
 }
 
 function callbackDelete(email, cb){
-    let response;
-    const req=https.request({
-        hostname: 'www.unlock-auth.com',
-        method: 'POST',
-        path: '/api/delete',
-        headers: {
-            'content-type': 'application/json'
-        }
-    }, (res)=>{
-        res.setEncoding('utf8');
-        res.on('data', (chunk)=>{
-            response=chunk;
-        });
-        res.on('end', ()=>{
-            cb(JSON.parse(response));
-        });
-    });
-
-    req.on('error', (err)=>{
-        throw err;
-    });
-
-    req.write(JSON.stringify({
+    requester.post('/api/delete', {
         email: email,
         apiKey: apiKey
-    }));
-    req.end();
+    }).then(resp=>{
+        cb({
+            status: resp.status,
+            data: resp.data
+        });
+    }).catch(err=>{
+        throw err;
+    });
 }
 
 function promiseDelete(email){
     return new Promise((resolve, reject)=>{
-        let response;
-        const req=https.request({
-            hostname: 'www.unlock-auth.com',
-            method: 'POST',
-            path: '/api/delete',
-            headers: {
-                'content-type': 'application/json'
-            }
-        }, (res)=>{
-            res.setEncoding('utf8');
-            res.on('data', (chunk)=>{
-                response=chunk;
-            });
-            res.on('end', ()=>{
-                resolve(JSON.parse(response));
-            });
-        });
-
-        req.on('error', (err)=>{
-            reject(err);
-        });
-
-        req.write(JSON.stringify({
+        requester.post('/api/delete', {
             email: email,
             apiKey: apiKey
-        }));
-        req.end();
+        }).then(resp=>{
+            resolve({
+                status: resp.status,
+                data: resp.data
+            });
+        }).catch(err=>reject(err));
     });
 }
 
@@ -280,13 +250,13 @@ function verifyOpts(obj, schema){
     const ret={};
     let key;
     for (key in obj){
-        if (!obj.hasOwnProperty(key)){continue;}
+        if (!Object.prototype.hasOwnProperty.call(obj, key)){continue;}
         if (typeof schema[key]==='undefined'){
             throw new Error('Unrecognized option '+key);
         }
     }
     for (key in schema){
-        if (!schema.hasOwnProperty(key)){continue;}
+        if (!Object.prototype.hasOwnProperty.call(schema, key)){continue;}
         const reqs=schema[key];
         const val=obj[key];
         if (typeof val==='undefined'){

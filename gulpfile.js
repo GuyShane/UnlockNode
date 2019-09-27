@@ -18,10 +18,10 @@ gulp.task('lint-lib', (cb)=>{
     ], cb);
 });
 
-gulp.task('lint', ['lint-tests', 'lint-lib']);
+gulp.task('lint', gulp.parallel('lint-tests', 'lint-lib'));
 
 gulp.task('watch-js', ()=>{
-    return gulp.watch(['./unlock.js', './test/test.js'], ['lint']);
+    return gulp.watch(['./unlock.js', './test/test.js'], gulp.series('lint'));
 });
 
-gulp.task('default', ['lint', 'watch-js']);
+gulp.task('default', gulp.parallel('lint', 'watch-js'));
