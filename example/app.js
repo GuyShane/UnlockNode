@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const http=require('http');
 const express=require('express');
 const bodyParser=require('body-parser');
@@ -77,4 +79,6 @@ unlock.init({
     }
 });
 
-server.listen(3000);
+server.listen(3000, ()=>{
+    console.log('Listening on port 3000');
+});
