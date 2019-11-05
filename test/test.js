@@ -141,6 +141,17 @@ describe('Unlock node library tests', function(){
             })).to.throw();
         });
 
+        it('Should fail if requiredFields is passed and is not an object', function(){
+            const server=http.createServer();
+            expect(unlock.init.bind(null, {
+                server: server,
+                apiKey: 'key',
+                version: 1,
+                requiredFields: 'hello',
+                onResponse: function(){}
+            })).to.throw();
+        });
+
         it('should fail if makePayload is passed and is not a function', function(){
             const server=http.createServer();
             expect(unlock.init.bind(null, {

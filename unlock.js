@@ -18,18 +18,19 @@ const responses={
 };
 
 const errorCodes={
-    USER_NOT_FOUND: 0,
-    APP_NOT_FOUND: 1,
-    APP_DISABLED: 2,
-    NOT_VERIFIED: 3,
-    TOO_SOON: 4,
-    ACTIVE_REQUEST: 5,
-    USER_DECLINED: 6,
-    NO_RESPONSE: 7,
-    USERS_EXCEEDED: 8,
-    REQUESTS_EXCEEDED: 9,
-    INVALID_TOKEN: 10,
-    INTERNAL_ERROR: 11
+    INTERNAL_ERROR: 0,
+    USER_NOT_FOUND: 1,
+    APP_NOT_FOUND: 2,
+    APP_DISABLED: 3,
+    NOT_VERIFIED: 4,
+    TOO_SOON: 5,
+    ACTIVE_REQUEST: 6,
+    USER_DECLINED: 7,
+    NO_RESPONSE: 8,
+    USERS_EXCEEDED: 9,
+    REQUESTS_EXCEEDED: 10,
+    INVALID_TOKEN: 11,
+    MISSING_FIELD: 12
 };
 
 function init(opts){
@@ -49,6 +50,11 @@ function init(opts){
         onResponse: {
             required: true,
             type: 'function'
+        },
+        requiredFields: {
+            required: false,
+            type: 'object',
+            default: null
         },
         makePayload: {
             required: false,
@@ -135,6 +141,7 @@ function listen(io, opts){
                     apiKey: opts.apiKey,
                     payload: opts.makePayload(browserData.email, browserData.extra)
                 };
+                insert(toSend, 'requiredFields', opts.requiredFields);
                 insert(toSend, 'exp', opts.exp);
                 insert(toSend, 'requestType', opts.requestType);
                 unlockSocket.send(JSON.stringify(toSend));

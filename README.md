@@ -50,6 +50,7 @@ The behaviour can be set as follows:
 | apiKey | string | **required** | - | Your private Unlock developer's API key. This will be used to sign tokens and verify your identity as a developer |
 | version | number | **required** | - | Which version of the Unlock API you would like to use |
 | onResponse | function | **required** | - | A function to be called when your server receives a response from the Unlock servers. The function is called with two parameters: `onResponse(socket, data)`. The first is the [socket connection](https://github.com/websockets/ws/blob/master/doc/ws.md#class-websocket) to the client, and the second is the data received as an object. See the [API documentation](https://www.unlock-app.com/documentation) for a description of the response object. You can then decide whether or not you'd like to close the socket connection from either end. |
+| requiredFields | object | optional | - | An object specifying which, if any, fields of a user's profile need to be filled out before registering with your app. For example you may require users to have a username. See the [API documentation](https://www.unlock-app.com/documentation) for a description of this parameter |
 | makePayload | function | optional | - | A function to be called before each request is sent to set any additional data you would like to be signed in your authentication JWT. The function is passed two parameters: `makePayload(email, extra)`. `email` is the email address of the user making the request, and `extra` is any additional data sent from the browser. If no extra data was specified, `extra` will be undefined |
 | cookieName | string | optional | - | If you store the authentication JWT in a cookie, this is the name with which it is saved. This option is only needed if you are using the provided express middleware and you would like it to verify requests using cookies |
 | exp | number | optional | 86400 | The expiration time of the authentication JWT, measured in seconds from issuance. Defaults to 24 hours. Set this to -1 to specify no expiration time |
@@ -133,18 +134,19 @@ const responses={
 This is an object listing the possible error codes you can receive describing why a request was not unlocked.
 ```js
 const errorCodes={
-    USER_NOT_FOUND: 0,
-    APP_NOT_FOUND: 1,
-    APP_DISABLED: 2,
-    NOT_VERIFIED: 3,
-    TOO_SOON: 4,
-    ACTIVE_REQUEST: 5,
-    USER_DECLINED: 6,
-    NO_RESPONSE: 7,
-    USERS_EXCEEDED: 8,
-    REQUESTS_EXCEEDED: 9,
-    INVALID_TOKEN: 10,
-    INTERNAL_ERROR: 11
+    INTERNAL_ERROR: 0,
+    USER_NOT_FOUND: 1,
+    APP_NOT_FOUND: 2,
+    APP_DISABLED: 3,
+    NOT_VERIFIED: 4,
+    TOO_SOON: 5,
+    ACTIVE_REQUEST: 6,
+    USER_DECLINED: 7,
+    NO_RESPONSE: 8,
+    USERS_EXCEEDED: 9,
+    REQUESTS_EXCEEDED: 10,
+    INVALID_TOKEN: 11,
+    MISSING_FIELD: 12
 };
 ```
 
